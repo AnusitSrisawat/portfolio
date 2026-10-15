@@ -79,7 +79,7 @@ export default async function Home() {
             <details
               key={g.id ?? "other"}
               open={i === 0}
-              className="group rounded-3xl border-2 border-ink bg-white open:bg-ink open:text-white"
+              className="group rounded-3xl border-2 border-ink bg-white open:bg-cream open:text-ink"
             >
               <summary className="flex cursor-pointer items-center justify-between gap-4 px-6 py-5 text-xl font-bold">
                 <span className="flex items-center gap-4">
@@ -95,7 +95,7 @@ export default async function Home() {
               </summary>
               <div className="space-y-3 px-6 pb-6">
                 {g.skills.map((s) => (
-                  <article key={s.id} className="grid gap-4 rounded-2xl border border-white/20 p-4 md:grid-cols-[14rem_1fr]">
+                  <article key={s.id} className="grid gap-4 rounded-2xl border border-ink/20 p-4 md:grid-cols-[14rem_1fr]">
                     <div className="space-y-1">
                       <h3 className="text-lg font-bold">{s.name}</h3>
                       {s.description && <p className="text-sm opacity-80">{s.description}</p>}
