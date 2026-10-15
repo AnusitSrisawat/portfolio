@@ -1,5 +1,6 @@
 import { getProfile } from "@/lib/data";
 import { saveProfile } from "@/lib/actions";
+import { ActionForm } from "@/components/ActionForm";
 
 export const dynamic = "force-dynamic";
 
@@ -17,7 +18,7 @@ const F = ({ label, name, value, area }: { label: string; name: string; value: s
 export default async function AdminProfile() {
   const p = await getProfile();
   return (
-    <form action={saveProfile} className="space-y-4">
+    <ActionForm action={saveProfile} className="space-y-4" confirm={{ title: "Save profile?", body: "This updates your public site.", label: "Save" }}>
       <h1 className="text-3xl font-extrabold">Profile</h1>
       <div className="grid gap-4 sm:grid-cols-2">
         <F label="Name" name="name" value={p.name} />
@@ -31,6 +32,6 @@ export default async function AdminProfile() {
       <F label="Short bio (hero)" name="bio" value={p.bio} area />
       <F label="About" name="about" value={p.about} area />
       <button className="btn btn-primary">Save</button>
-    </form>
+    </ActionForm>
   );
 }

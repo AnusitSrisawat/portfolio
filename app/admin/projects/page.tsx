@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { getGroups } from "@/lib/data";
 import { addProject, deleteProject, updateProject } from "@/lib/actions";
+import { ActionForm } from "@/components/ActionForm";
 
 export const dynamic = "force-dynamic";
 
@@ -35,7 +36,7 @@ export default async function AdminProjects() {
     <div className="space-y-8">
       <h1 className="text-3xl font-extrabold">Projects</h1>
 
-      <form action={addProject} className="space-y-3 rounded-3xl border-2 border-ink bg-amber/30 p-5">
+      <ActionForm action={addProject} resetOnSuccess pendingText="Adding…" successText="Project added" className="space-y-3 rounded-3xl border-2 border-ink bg-amber/30 p-5">
         <h2 className="font-bold">New project</h2>
         <div className="grid gap-2 sm:grid-cols-[1fr_1.5fr_1fr]">
           <input name="title" required placeholder="Title" className="input" />
@@ -45,11 +46,12 @@ export default async function AdminProjects() {
         <input name="tags" placeholder="Tags, comma separated (e.g. Tailwind, Prisma)" className="input" />
         <SkillPicker groups={groups} />
         <button className="btn btn-dark text-sm">Add project</button>
-      </form>
+      </ActionForm>
 
       {projects.length === 0 && <p className="opacity-60">No projects yet.</p>}
       {projects.map((p) => (
-        <form key={p.id} action={updateProject} className="space-y-3 rounded-3xl border-2 border-ink bg-white p-5">
+        <div key={p.id}>
+        <ActionForm action={updateProject} className="space-y-3 rounded-3xl border-2 border-ink bg-white p-5" confirm={{ title: `Save “${p.title}”?`, label: "Save" }}>
           <input type="hidden" name="id" value={p.id} />
           <div className="grid gap-2 sm:grid-cols-[1fr_1.5fr_1fr]">
             <input name="title" defaultValue={p.title} required aria-label="Title" className="input font-bold" />
@@ -60,9 +62,19 @@ export default async function AdminProjects() {
           <SkillPicker groups={groups} selected={p.skills.map((s) => s.id)} />
           <div className="flex gap-2">
             <button className="btn btn-primary text-sm">Save</button>
-            <button formAction={deleteProject} formNoValidate className="btn bg-red-100 text-sm">Delete</button>
+            <button type="submit" form={`del-${p.id}`} formNoValidate className="btn bg-red-100 text-sm">Delete</button>
           </div>
-        </form>
+        </ActionForm>
+        <ActionForm
+          id={`del-${p.id}`}
+          action={deleteProject}
+          pendingText="Deleting…"
+          successText="Deleted"
+          confirm={{ title: `Delete “${p.title}”?`, body: "This can't be undone.", label: "Delete", danger: true }}
+        >
+          <input type="hidden" name="id" value={p.id} />
+        </ActionForm>
+        </div>
       ))}
     </div>
   );
