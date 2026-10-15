@@ -1,11 +1,19 @@
 import type { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
+import { DEFAULT_COLORS } from "@/lib/theme";
 
 export async function getProfile() {
-  return (
+  const p =
     (await db.profile.findUnique({ where: { id: 1 } })) ??
-    (await db.profile.create({ data: { id: 1 } }))
-  );
+    (await db.profile.create({ data: { id: 1 } }));
+  // Colors fall back to defaults if the columns are missing/empty (e.g. stale Prisma client or unmigrated DB).
+  return {
+    ...p,
+    colorCream: p.colorCream || DEFAULT_COLORS.colorCream,
+    colorInk: p.colorInk || DEFAULT_COLORS.colorInk,
+    colorAmber: p.colorAmber || DEFAULT_COLORS.colorAmber,
+    colorAmberDeep: p.colorAmberDeep || DEFAULT_COLORS.colorAmberDeep,
+  };
 }
 
 export type SkillWithProjects = Prisma.SkillGetPayload<object> & {
