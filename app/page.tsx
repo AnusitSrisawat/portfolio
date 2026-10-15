@@ -102,7 +102,7 @@ export default async function Home() {
                   </div>
                 )}
                 {s.projects.length > 0 ? (
-                  <ul className="grid gap-2 sm:grid-cols-2">
+                  <ul className="flex flex-col gap-2">
                     {s.projects.map((pr) => (
                       <li key={pr.id}>
                         <a
