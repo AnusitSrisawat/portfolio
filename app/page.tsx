@@ -77,8 +77,7 @@ export default async function Home() {
           {groups.length === 0 && <p className="text-black/60">No skills yet.</p>}
           {groups.map((g, i) => (
             <details
-              key={g.id ?? "other"}
-              name="skills"
+              key={s.id}
               open={i === 0}
               className="group rounded-3xl border-2 border-ink bg-white open:bg-ink open:text-white"
             >
@@ -88,44 +87,43 @@ export default async function Home() {
                   {g.name}
                   <span className="text-sm font-normal opacity-50">{g.skills.length}</span>
                 </span>
-                <span className="chev grid h-9 w-9 place-items-center rounded-full bg-amber text-2xl text-ink transition-transform">+</span>
+                <span className="chev grid h-9 w-9 shrink-0 place-items-center rounded-full bg-amber text-ink transition-transform">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden>
+                    <path d="M8 2v12M2 8h12" />
+                  </svg>
+                </span>
               </summary>
-              <div className="space-y-3 px-6 pb-6">
-                {g.skills.map((s) => (
-                  <article key={s.id} className="grid gap-4 rounded-2xl border border-white/20 p-4 md:grid-cols-[14rem_1fr]">
-                    <div className="space-y-1">
-                      <h3 className="text-lg font-bold">{s.name}</h3>
-                      {s.description && <p className="text-sm opacity-80">{s.description}</p>}
-                    </div>
-                    {s.projects.length > 0 && (
-                      <ul className="grid content-start gap-2 lg:grid-cols-2">
-                        {s.projects.map((pr) => (
-                          <li key={pr.id}>
-                            <a
-                              href={pr.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex items-center justify-between rounded-xl bg-amber px-3 py-2 text-sm font-semibold text-ink hover:bg-amber-deep"
-                            >
-                              <span>
-                                {pr.title}
-                                {pr.description && <span className="mt-0.5 block text-xs font-normal opacity-80">{pr.description}</span>}
-                                {pr.tags.length > 0 && (
-                                  <span className="mt-1 flex flex-wrap gap-1">
-                                    {pr.tags.map((t) => (
-                                      <span key={t} className="rounded-full bg-ink/10 px-2 py-0.5 text-[11px] font-medium">{t}</span>
-                                    ))}
-                                  </span>
-                                )}
-                              </span>
-                              <span aria-hidden>↗</span>
-                            </a>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </article>
-                ))}
+              <div className="space-y-4 px-6 pb-6">
+                {s.description && <p className="max-w-2xl opacity-80">{s.description}</p>}
+                {s.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {s.tags.map((t) => (
+                      <span key={t} className="rounded-full border border-white/40 px-3 py-1 text-xs">{t}</span>
+                    ))}
+                  </div>
+                )}
+                {s.projects.length > 0 ? (
+                  <ul className="flex flex-col gap-2">
+                    {s.projects.map((pr) => (
+                      <li key={pr.id}>
+                        <a
+                          href={pr.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center justify-between rounded-2xl bg-amber px-4 py-3 font-semibold text-ink hover:bg-amber-deep"
+                        >
+                          <span>
+                            {pr.title}
+                            {pr.note && <span className="block text-xs font-normal opacity-70">{pr.note}</span>}
+                          </span>
+                          <span aria-hidden>↗</span>
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-sm opacity-60">Projects coming soon.</p>
+                )}
               </div>
             </details>
           ))}
