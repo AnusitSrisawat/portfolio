@@ -28,19 +28,19 @@ export default async function Home() {
       {/* Hero */}
       <section id="top" className="mx-auto grid max-w-6xl items-center gap-8 px-4 pb-16 pt-6 md:grid-cols-2">
         <div>
-          <h1 className="text-5xl font-extrabold leading-tight md:text-7xl">
+          <h1 className="fade-up text-5xl font-extrabold leading-tight md:text-7xl">
             {p.headline}
             <br />
             <span className="text-amber-deep">{p.name}</span>
           </h1>
-          <p className="mt-3 text-xl font-semibold">{p.role}</p>
-          {p.bio && <p className="mt-4 max-w-md text-black/70">{p.bio}</p>}
-          <div className="mt-8 flex gap-3">
+          <p className="fade-up d1 mt-3 text-xl font-semibold">{p.role}</p>
+          {p.bio && <p className="fade-up d2 mt-4 max-w-md text-black/70">{p.bio}</p>}
+          <div className="fade-up d3 mt-8 flex gap-3">
             <a href="#skills" className="btn btn-primary">Portfolio</a>
             <a href="#contact" className="btn bg-white">Hire me</a>
           </div>
         </div>
-        <div className="relative mx-auto w-full max-w-sm">
+        <div className="fade-up d2 relative mx-auto w-full max-w-sm">
           <div className="absolute inset-x-6 bottom-0 top-10 rounded-[2.5rem] bg-amber" />
           {p.avatarUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -94,8 +94,8 @@ export default async function Home() {
                 </span>
               </summary>
               <div className="space-y-3 px-6 pb-6">
-                {g.skills.map((s) => (
-                  <article key={s.id} className="grid gap-4 rounded-2xl bg-cream p-4 text-ink md:grid-cols-[14rem_1fr]">
+                {g.skills.map((s, si) => (
+                  <article key={s.id} style={{ "--i": si } as React.CSSProperties} className="reveal skill-card grid gap-4 rounded-2xl bg-cream p-4 text-ink md:grid-cols-[14rem_1fr]">
                     <div className="space-y-1">
                       <h3 className="text-lg font-bold">{s.name}</h3>
                       {s.description && <p className="text-sm opacity-80">{s.description}</p>}
@@ -108,7 +108,7 @@ export default async function Home() {
                               href={pr.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="flex items-center justify-between rounded-xl bg-amber px-3 py-2 text-sm font-semibold text-ink hover:bg-amber-deep"
+                              className="project-link flex items-center justify-between rounded-xl bg-amber px-3 py-2 text-sm font-semibold text-ink hover:bg-amber-deep"
                             >
                               <span>
                                 {pr.title}
@@ -121,7 +121,7 @@ export default async function Home() {
                                   </span>
                                 )}
                               </span>
-                              <span aria-hidden>↗</span>
+                              <span aria-hidden className="arrow">↗</span>
                             </a>
                           </li>
                         ))}

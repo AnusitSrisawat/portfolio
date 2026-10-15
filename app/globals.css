@@ -9,6 +9,9 @@
   --font-display: var(--font-prompt), var(--font-thai), ui-sans-serif, system-ui, sans-serif;
 }
 
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
 body {
   background: var(--color-cream);
   color: var(--color-ink);
@@ -31,9 +34,53 @@ h1, h2 { line-height: 1.15; }
   .marquee-track { animation: none; }
 }
 
+:root { interpolate-size: allow-keywords; }
+
 details > summary { list-style: none; }
 details > summary::-webkit-details-marker { display: none; }
 details[open] .chev { transform: rotate(45deg); }
+
+/* Category open/close: smooth height (Chrome/Edge/Safari TP); other browsers fall back to the fade below */
+details::details-content {
+  block-size: 0;
+  overflow: clip;
+  transition: block-size 0.4s cubic-bezier(0.22, 1, 0.36, 1), content-visibility 0.4s allow-discrete;
+}
+details[open]::details-content { block-size: auto; }
+
+details { transition: background-color 0.3s, box-shadow 0.3s, transform 0.3s; }
+details:hover { box-shadow: 4px 4px 0 var(--color-ink); transform: translate(-2px, -2px); }
+details[open]:hover { box-shadow: 6px 6px 0 var(--color-amber); }
+details > summary { transition: opacity 0.2s; }
+details > summary:hover .chev { background: var(--color-amber-deep); }
+.chev { transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s; }
+details:hover > summary .chev { scale: 1.1; }
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+details[open] .reveal { animation: rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; animation-delay: calc(var(--i, 0) * 70ms + 80ms); }
+
+/* Skill panels & project links */
+.skill-card { transition: transform 0.25s, box-shadow 0.25s; }
+.skill-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px -8px rgb(0 0 0 / 0.45); }
+.project-link { transition: transform 0.2s, background-color 0.2s, box-shadow 0.2s; }
+.project-link:hover { transform: translateX(4px); box-shadow: -4px 0 0 var(--color-ink); }
+.project-link .arrow { display: inline-block; transition: transform 0.25s; }
+.project-link:hover .arrow { transform: translate(3px, -3px); }
+
+/* Page load */
+.fade-up { animation: rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.fade-up.d1 { animation-delay: 0.1s; }
+.fade-up.d2 { animation-delay: 0.2s; }
+.fade-up.d3 { animation-delay: 0.3s; }
+
+@media (prefers-reduced-motion: reduce) {
+  details, details::details-content, .chev, .skill-card, .project-link, .project-link .arrow { transition: none; }
+  details:hover, .skill-card:hover, .project-link:hover { transform: none; }
+  details[open] .reveal, .fade-up { animation: none; }
+}
 
 .input {
   width: 100%;
@@ -43,6 +90,7 @@ details[open] .chev { transform: rotate(45deg); }
   padding: 0.5rem 0.75rem;
 }
 .btn {
+  transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
   border: 2px solid var(--color-ink);
   border-radius: 999px;
   padding: 0.4rem 1.1rem;
@@ -51,3 +99,7 @@ details[open] .chev { transform: rotate(45deg); }
 }
 .btn-primary { background: var(--color-amber); }
 .btn-dark { background: var(--color-ink); color: #fff; }
+.btn:hover { transform: translateY(-2px); box-shadow: 0 4px 0 var(--color-ink); }
+.btn:active { transform: translateY(1px); box-shadow: none; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+@media (prefers-reduced-motion: reduce) { .btn { transition: none; } .btn:hover { transform: none; } }
