@@ -21,21 +21,40 @@ model Profile {
   linkedin  String @default("")
 }
 
+model Category {
+  id       Int     @id @default(autoincrement())
+  name     String
+  position Int     @default(0)
+  skills   Skill[]
+}
+
 model Skill {
   id          Int       @id @default(autoincrement())
+  category    Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  categoryId  Int?
   name        String
   description String    @default("")
-  tags        String[]  @default([])
-  level       Int       @default(3)
   position    Int       @default(0)
-  projects    Project[]
+  projects    SkillProject[]
 }
 
 model Project {
   id      Int    @id @default(autoincrement())
   title   String
   url     String
-  note    String @default("")
-  skill   Skill  @relation(fields: [skillId], references: [id], onDelete: Cascade)
-  skillId Int
+  // column kept as "note" in the DB so existing text survives the rename
+  description String @default("") @map("note")
+  tags   String[] @default([])
+  skills SkillProject[]
+}
+
+// Explicit join so each skill can order its own projects.
+model SkillProject {
+  skill     Skill   @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  skillId   Int
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId Int
+  position  Int     @default(0)
+
+  @@id([skillId, projectId])
 }
