@@ -42,7 +42,8 @@ model Project {
   id      Int    @id @default(autoincrement())
   title   String
   url     String
-  note   String   @default("")
+  // column kept as "note" in the DB so existing text survives the rename
+  description String @default("") @map("note")
   tags   String[] @default([])
   skills Skill[]
 }

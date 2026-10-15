@@ -109,7 +109,7 @@ export default async function Home() {
                             >
                               <span>
                                 {pr.title}
-                                {pr.note && <span className="block text-xs font-normal opacity-70">{pr.note}</span>}
+                                {pr.description && <span className="mt-0.5 block text-xs font-normal opacity-80">{pr.description}</span>}
                                 {pr.tags.length > 0 && (
                                   <span className="mt-1 flex flex-wrap gap-1">
                                     {pr.tags.map((t) => (

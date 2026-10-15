@@ -23,9 +23,10 @@ const Move = ({ action, id, last, first }: { action: (fd: FormData) => Promise<v
 );
 
 export default async function AdminSkills() {
-  const [groups, categories] = await Promise.all([
+  const [groups, categories, allProjects] = await Promise.all([
     getGroups(),
     db.category.findMany({ orderBy: [{ position: "asc" }, { id: "asc" }] }),
+    db.project.findMany({ orderBy: { title: "asc" }, select: { id: true, title: true } }),
   ]);
 
   return (
@@ -70,6 +71,28 @@ export default async function AdminSkills() {
                   </select>
                 </div>
                 <textarea name="description" defaultValue={s.description} rows={2} placeholder="Description" className="input" />
+                <fieldset className="space-y-1">
+                  <legend className="mb-1 text-sm font-semibold">Projects</legend>
+                  {allProjects.length === 0 ? (
+                    <p className="text-sm opacity-60">
+                      No projects yet. <a href="/admin/projects" className="underline">Create one</a>
+                    </p>
+                  ) : (
+                    <div className="flex flex-wrap gap-x-4 gap-y-1">
+                      {allProjects.map((p) => (
+                        <label key={p.id} className="flex items-center gap-1 text-sm">
+                          <input
+                            type="checkbox"
+                            name="projectIds"
+                            value={p.id}
+                            defaultChecked={s.projects.some((sp) => sp.id === p.id)}
+                          />
+                          {p.title}
+                        </label>
+                      ))}
+                    </div>
+                  )}
+                </fieldset>
                 <button className="btn btn-primary text-sm">Save</button>
               </ActionForm>
 
@@ -81,17 +104,6 @@ export default async function AdminSkills() {
                 </ActionForm>
               </div>
 
-              <div className="border-t-2 border-dashed border-ink/20 pt-4 text-sm">
-                <h3 className="mb-1 font-bold">Projects</h3>
-                {s.projects.length ? (
-                  <ul className="list-disc pl-5">
-                    {s.projects.map((pr) => <li key={pr.id}>{pr.title}</li>)}
-                  </ul>
-                ) : (
-                  <p className="opacity-60">None linked.</p>
-                )}
-                <a href="/admin/projects" className="mt-1 inline-block underline">Manage projects →</a>
-              </div>
             </article>
           ))}
 

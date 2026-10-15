@@ -124,6 +124,7 @@ export async function updateSkill(fd: FormData) {
       categoryId,
       position,
       description: str(fd, "description", 600),
+      projects: { set: await projectSet(fd) },
     },
   });
   refresh();
@@ -150,20 +151,21 @@ export async function moveSkill(fd: FormData) {
   refresh();
 }
 
-// Only link to skills that exist (ignores tampered/stale ids).
-async function skillConnect(fd: FormData) {
-  const ids = fd.getAll("skillIds").map(Number).filter((n) => Number.isInteger(n) && n > 0);
-  const found = await db.skill.findMany({ where: { id: { in: ids } }, select: { id: true } });
-  return found.map((s) => ({ id: s.id }));
+// Only link to projects that exist (ignores tampered/stale ids).
+async function projectSet(fd: FormData) {
+  const ids = fd.getAll("projectIds").map(Number).filter((n) => Number.isInteger(n) && n > 0);
+  const found = await db.project.findMany({ where: { id: { in: ids } }, select: { id: true } });
+  return found.map((p) => ({ id: p.id }));
 }
 
 export async function addProject(fd: FormData) {
   await requireAdmin();
   const title = str(fd, "title", 100);
   const url = safeUrl(str(fd, "url", 500));
-  if (!title || !url) return;
+  const description = str(fd, "description", 1000);
+  if (!title || !url || !description) return;
   await db.project.create({
-    data: { title, url, note: str(fd, "note", 200), tags: parseTags(str(fd, "tags", 300)), skills: { connect: await skillConnect(fd) } },
+    data: { title, url, description, tags: parseTags(str(fd, "tags", 300)) },
   });
   refresh();
 }
@@ -173,10 +175,11 @@ export async function updateProject(fd: FormData) {
   const id = Number(fd.get("id"));
   const title = str(fd, "title", 100);
   const url = safeUrl(str(fd, "url", 500));
-  if (!id || !title || !url) return;
+  const description = str(fd, "description", 1000);
+  if (!id || !title || !url || !description) return;
   await db.project.update({
     where: { id },
-    data: { title, url, note: str(fd, "note", 200), tags: parseTags(str(fd, "tags", 300)), skills: { set: await skillConnect(fd) } },
+    data: { title, url, description, tags: parseTags(str(fd, "tags", 300)) },
   });
   refresh();
 }
