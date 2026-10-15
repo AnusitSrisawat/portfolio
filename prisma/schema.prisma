@@ -19,6 +19,10 @@ model Profile {
   github    String @default("")
   email     String @default("")
   linkedin  String @default("")
+  colorCream     String @default("#f6f1e7")
+  colorInk       String @default("#141414")
+  colorAmber     String @default("#f5a623")
+  colorAmberDeep String @default("#e8890c")
 }
 
 model Category {

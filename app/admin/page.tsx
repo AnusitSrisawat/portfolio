@@ -1,6 +1,7 @@
 import { getProfile } from "@/lib/data";
 import { saveProfile } from "@/lib/actions";
 import { requireAdminPage } from "@/lib/session";
+import { ColorFields } from "@/components/ColorFields";
 import { ActionForm } from "@/components/ActionForm";
 
 export const dynamic = "force-dynamic";
@@ -33,6 +34,9 @@ export default async function AdminProfile() {
       </div>
       <F label="Short bio (hero)" name="bio" value={p.bio} area />
       <F label="About" name="about" value={p.about} area />
+      <ColorFields
+        initial={{ colorCream: p.colorCream, colorInk: p.colorInk, colorAmber: p.colorAmber, colorAmberDeep: p.colorAmberDeep }}
+      />
       <button className="btn btn-primary">Save</button>
     </ActionForm>
   );

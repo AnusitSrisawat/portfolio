@@ -3,6 +3,7 @@ import { revalidatePath } from "next/cache";
 import { auth, signIn, signOut } from "@/auth";
 import { db } from "@/lib/db";
 import { safeUrl, str } from "@/lib/validate";
+import { DEFAULT_COLORS, isHexColor, type ColorKey } from "@/lib/theme";
 
 async function requireAdmin() {
   const s = await auth();
@@ -45,6 +46,14 @@ export async function saveProfile(fd: FormData) {
     github: optionalUrl(str(fd, "github"), "GitHub URL"),
     linkedin: optionalUrl(str(fd, "linkedin"), "LinkedIn URL"),
     email: str(fd, "email", 120),
+    ...(Object.keys(DEFAULT_COLORS) as ColorKey[]).reduce(
+      (acc, k) => {
+        const v = str(fd, k, 7);
+        acc[k] = v === "" ? DEFAULT_COLORS[k] : isHexColor(v) ? v.toLowerCase() : invalid("color");
+        return acc;
+      },
+      {} as Record<ColorKey, string>,
+    ),
   };
   await db.profile.upsert({ where: { id: 1 }, update: data, create: { id: 1, ...data } });
   refresh();
