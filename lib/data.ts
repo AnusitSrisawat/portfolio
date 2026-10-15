@@ -8,7 +8,9 @@ export async function getProfile() {
   );
 }
 
-export type SkillWithProjects = Prisma.SkillGetPayload<{ include: { projects: true } }>;
+export type SkillWithProjects = Prisma.SkillGetPayload<object> & {
+  projects: Prisma.ProjectGetPayload<object>[]; // ordered by this skill's own ordering
+};
 
 export type Group = {
   id: number | null; // null = skills without a category
@@ -18,13 +20,19 @@ export type Group = {
 
 // Categories in order, followed by an "Other" group for uncategorised skills.
 export async function getGroups(): Promise<Group[]> {
-  const [cats, skills] = await Promise.all([
+  const [cats, rows] = await Promise.all([
     db.category.findMany({ orderBy: [{ position: "asc" }, { id: "asc" }] }),
     db.skill.findMany({
       orderBy: [{ position: "asc" }, { id: "asc" }],
-      include: { projects: { orderBy: { id: "asc" } } },
+      include: {
+        projects: { orderBy: [{ position: "asc" }, { projectId: "asc" }], include: { project: true } },
+      },
     }),
   ]);
+  const skills: SkillWithProjects[] = rows.map(({ projects, ...s }) => ({
+    ...s,
+    projects: projects.map((sp) => sp.project),
+  }));
   const groups: Group[] = cats.map((c) => ({
     id: c.id,
     name: c.name,

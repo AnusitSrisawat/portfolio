@@ -26,3 +26,10 @@ Projects are now linked to many skills. If you already have data, run once **bef
 psql "$DATABASE_URL" -f prisma/migrate-project-links.sql
 npm run db:push -- --accept-data-loss   # drops the old Project.skillId column
 ```
+
+### Upgrading to ordered project links (per-skill project order)
+Skills now keep their own ordering of projects in a `SkillProject` table. If you already have links, run once **before** `npm run db:push`:
+```bash
+psql "$DATABASE_URL" -f prisma/migrate-skill-project.sql
+npm run db:push -- --accept-data-loss   # drops the old "_ProjectToSkill" table
+```

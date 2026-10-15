@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 export default async function AdminProjects() {
   const projects = await db.project.findMany({
     orderBy: { id: "desc" },
-    include: { skills: { select: { id: true, name: true } } },
+    include: { skills: { include: { skill: { select: { name: true } } } } },
   });
 
   return (
@@ -38,7 +38,7 @@ export default async function AdminProjects() {
           <textarea name="description" defaultValue={p.description} required rows={3} placeholder="Describe this project" aria-label="Description" className="input" />
           <input name="tags" defaultValue={p.tags.join(", ")} placeholder="Tags, comma separated" aria-label="Tags" className="input" />
           <p className="text-sm opacity-70">
-            Linked skills: {p.skills.length ? p.skills.map((s) => s.name).join(", ") : "none yet"} — change on the Skills page
+            Linked skills: {p.skills.length ? p.skills.map((sp) => sp.skill.name).join(", ") : "none yet"} — change on the Skills page
           </p>
           <div className="flex gap-2">
             <button className="btn btn-primary text-sm">Save</button>

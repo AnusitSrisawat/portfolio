@@ -6,6 +6,7 @@ import {
 } from "@/lib/actions";
 import { ActionForm } from "@/components/ActionForm";
 import { SkillBoard } from "@/components/SkillBoard";
+import { ProjectPicker } from "@/components/ProjectPicker";
 
 export const dynamic = "force-dynamic";
 
@@ -100,25 +101,7 @@ export default async function AdminSkills() {
                 <textarea name="description" defaultValue={s.description} rows={2} placeholder="Description" className="input" />
                 <fieldset className="space-y-1">
                   <legend className="mb-1 text-sm font-semibold">Projects</legend>
-                  {allProjects.length === 0 ? (
-                    <p className="text-sm opacity-60">
-                      No projects yet. <a href="/admin/projects" className="underline">Create one</a>
-                    </p>
-                  ) : (
-                    <div className="flex flex-wrap gap-x-4 gap-y-1">
-                      {allProjects.map((p) => (
-                        <label key={p.id} className="flex items-center gap-1 text-sm">
-                          <input
-                            type="checkbox"
-                            name="projectIds"
-                            value={p.id}
-                            defaultChecked={s.projects.some((sp) => sp.id === p.id)}
-                          />
-                          {p.title}
-                        </label>
-                      ))}
-                    </div>
-                  )}
+                  <ProjectPicker options={allProjects} initial={s.projects.map((p) => p.id)} />
                 </fieldset>
                 <button className="btn btn-primary text-sm">Save</button>
               </ActionForm>

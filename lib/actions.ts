@@ -117,16 +117,17 @@ export async function updateSkill(fd: FormData) {
     const last = await db.skill.findFirst({ where: { categoryId }, orderBy: { position: "desc" } });
     position = (last?.position ?? -1) + 1;
   }
-  await db.skill.update({
-    where: { id },
-    data: {
-      name,
-      categoryId,
-      position,
-      description: str(fd, "description", 600),
-      projects: { set: await projectSet(fd) },
-    },
-  });
+  const projectIds = await projectIdsInOrder(fd);
+  await db.$transaction([
+    db.skill.update({
+      where: { id },
+      data: { name, categoryId, position, description: str(fd, "description", 600) },
+    }),
+    db.skillProject.deleteMany({ where: { skillId: id } }),
+    db.skillProject.createMany({
+      data: projectIds.map((projectId, i) => ({ skillId: id, projectId, position: i })),
+    }),
+  ]);
   refresh();
 }
 
@@ -158,11 +159,13 @@ export async function saveLayout(layout: Layout) {
   refresh();
 }
 
-// Only link to projects that exist (ignores tampered/stale ids).
-async function projectSet(fd: FormData) {
-  const ids = fd.getAll("projectIds").map(Number).filter((n) => Number.isInteger(n) && n > 0);
-  const found = await db.project.findMany({ where: { id: { in: ids } }, select: { id: true } });
-  return found.map((p) => ({ id: p.id }));
+// Ordered, de-duplicated ids of existing projects (ignores tampered/stale ids).
+async function projectIdsInOrder(fd: FormData) {
+  const raw = fd.getAll("projectIds").map(Number).filter((n) => Number.isInteger(n) && n > 0);
+  const found = new Set(
+    (await db.project.findMany({ where: { id: { in: raw } }, select: { id: true } })).map((p) => p.id),
+  );
+  return [...new Set(raw)].filter((id) => found.has(id));
 }
 
 export async function addProject(fd: FormData) {
