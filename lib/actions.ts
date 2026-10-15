@@ -136,18 +136,25 @@ export async function deleteSkill(fd: FormData) {
   refresh();
 }
 
-export async function moveSkill(fd: FormData) {
+export type Layout = { categoryId: number | null; skillIds: number[] }[];
+
+// Persist drag-and-drop: every skill's category and position in one transaction.
+export async function saveLayout(layout: Layout) {
   await requireAdmin();
-  const id = Number(fd.get("id"));
-  const cur = await db.skill.findUnique({ where: { id } });
-  if (!cur) return;
-  const peers = await db.skill.findMany({
-    where: { categoryId: cur.categoryId },
-    orderBy: [{ position: "asc" }, { id: "asc" }],
-  });
-  await reorder(peers, id, fd.get("dir") === "up" ? -1 : 1, (s, position) =>
-    db.skill.update({ where: { id: s.id }, data: { position } }),
-  );
+  const cats = new Set((await db.category.findMany({ select: { id: true } })).map((c) => c.id));
+  const skills = new Set((await db.skill.findMany({ select: { id: true } })).map((s) => s.id));
+  const seen = new Set<number>();
+  const ops = [];
+  for (const col of layout) {
+    if (col.categoryId !== null && !cats.has(col.categoryId)) continue;
+    let pos = 0;
+    for (const id of col.skillIds) {
+      if (!skills.has(id) || seen.has(id)) continue;
+      seen.add(id);
+      ops.push(db.skill.update({ where: { id }, data: { categoryId: col.categoryId, position: pos++ } }));
+    }
+  }
+  if (ops.length) await db.$transaction(ops);
   refresh();
 }
 

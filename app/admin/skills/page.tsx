@@ -2,9 +2,10 @@ import { db } from "@/lib/db";
 import { getGroups } from "@/lib/data";
 import {
   addCategory, addSkill, deleteCategory, deleteSkill,
-  moveCategory, moveSkill, renameCategory, updateSkill,
+  moveCategory, renameCategory, saveLayout, updateSkill,
 } from "@/lib/actions";
 import { ActionForm } from "@/components/ActionForm";
+import { SkillBoard } from "@/components/SkillBoard";
 
 export const dynamic = "force-dynamic";
 
@@ -37,6 +38,32 @@ export default async function AdminSkills() {
         <input name="name" required placeholder="New category (e.g. Frontend)" className="input" />
         <button className="btn btn-dark whitespace-nowrap">Add category</button>
       </ActionForm>
+
+      {groups.some((g) => g.skills.length) && (
+        <section className="space-y-3 rounded-3xl border-2 border-ink bg-white p-5">
+          <h2 className="text-xl font-extrabold">Arrange</h2>
+          <SkillBoard
+            save={saveLayout}
+            deleteAction={deleteSkill}
+            columns={[
+              ...categories.map((c) => ({
+                key: `c${c.id}`,
+                categoryId: c.id as number | null,
+                name: c.name,
+                skills: (groups.find((g) => g.id === c.id)?.skills ?? []).map((s) => ({ id: s.id, name: s.name })),
+              })),
+              ...(groups.some((g) => g.id === null)
+                ? [{
+                    key: "other",
+                    categoryId: null as number | null,
+                    name: "Other (no category)",
+                    skills: (groups.find((g) => g.id === null)?.skills ?? []).map((s) => ({ id: s.id, name: s.name })),
+                  }]
+                : []),
+            ]}
+          />
+        </section>
+      )}
 
       {groups.map((g, gi) => (
         <section key={g.id ?? "other"} className="space-y-4">
@@ -95,14 +122,6 @@ export default async function AdminSkills() {
                 </fieldset>
                 <button className="btn btn-primary text-sm">Save</button>
               </ActionForm>
-
-              <div className="flex gap-2">
-                <Move action={moveSkill} id={s.id} first={i === 0} last={i === g.skills.length - 1} />
-                <ActionForm action={deleteSkill} pendingText="Deleting…" successText="Deleted" confirm={{ title: `Delete “${s.name}”?`, body: "Linked projects are kept, just unlinked.", label: "Delete", danger: true }}>
-                  <input type="hidden" name="id" value={s.id} />
-                  <button className="btn bg-red-100 text-sm">Delete skill</button>
-                </ActionForm>
-              </div>
 
             </article>
           ))}
