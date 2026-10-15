@@ -124,7 +124,6 @@ export async function updateSkill(fd: FormData) {
       categoryId,
       position,
       description: str(fd, "description", 600),
-      tags: parseTags(str(fd, "tags", 300)),
     },
   });
   refresh();
@@ -164,7 +163,7 @@ export async function addProject(fd: FormData) {
   const url = safeUrl(str(fd, "url", 500));
   if (!title || !url) return;
   await db.project.create({
-    data: { title, url, note: str(fd, "note", 200), skills: { connect: await skillConnect(fd) } },
+    data: { title, url, note: str(fd, "note", 200), tags: parseTags(str(fd, "tags", 300)), skills: { connect: await skillConnect(fd) } },
   });
   refresh();
 }
@@ -177,7 +176,7 @@ export async function updateProject(fd: FormData) {
   if (!id || !title || !url) return;
   await db.project.update({
     where: { id },
-    data: { title, url, note: str(fd, "note", 200), skills: { set: await skillConnect(fd) } },
+    data: { title, url, note: str(fd, "note", 200), tags: parseTags(str(fd, "tags", 300)), skills: { set: await skillConnect(fd) } },
   });
   refresh();
 }

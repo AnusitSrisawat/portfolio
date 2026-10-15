@@ -42,6 +42,7 @@ export default async function AdminProjects() {
           <input name="url" required type="url" placeholder="https://…" className="input" />
           <input name="note" placeholder="Note (optional)" className="input" />
         </div>
+        <input name="tags" placeholder="Tags, comma separated (e.g. Tailwind, Prisma)" className="input" />
         <SkillPicker groups={groups} />
         <button className="btn btn-dark text-sm">Add project</button>
       </form>
@@ -55,6 +56,7 @@ export default async function AdminProjects() {
             <input name="url" defaultValue={p.url} required type="url" aria-label="URL" className="input" />
             <input name="note" defaultValue={p.note} placeholder="Note (optional)" aria-label="Note" className="input" />
           </div>
+          <input name="tags" defaultValue={p.tags.join(", ")} placeholder="Tags, comma separated" aria-label="Tags" className="input" />
           <SkillPicker groups={groups} selected={p.skills.map((s) => s.id)} />
           <div className="flex gap-2">
             <button className="btn btn-primary text-sm">Save</button>

@@ -69,7 +69,6 @@ export default async function AdminSkills() {
                   </select>
                 </div>
                 <textarea name="description" defaultValue={s.description} rows={2} placeholder="Description" className="input" />
-                <input name="tags" defaultValue={s.tags.join(", ")} placeholder="Tags, comma separated (e.g. Next.js, Hooks)" className="input" />
                 <button className="btn btn-primary text-sm">Save</button>
               </form>
 

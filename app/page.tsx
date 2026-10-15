@@ -95,13 +95,6 @@ export default async function Home() {
                   <article key={s.id} className="space-y-3 rounded-2xl border border-white/20 p-4">
                     <h3 className="text-lg font-bold">{s.name}</h3>
                     {s.description && <p className="text-sm opacity-80">{s.description}</p>}
-                    {s.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-2">
-                        {s.tags.map((t) => (
-                          <span key={t} className="rounded-full border border-white/40 px-3 py-1 text-xs">{t}</span>
-                        ))}
-                      </div>
-                    )}
                     {s.projects.length > 0 && (
                       <ul className="space-y-2">
                         {s.projects.map((pr) => (
@@ -115,6 +108,13 @@ export default async function Home() {
                               <span>
                                 {pr.title}
                                 {pr.note && <span className="block text-xs font-normal opacity-70">{pr.note}</span>}
+                                {pr.tags.length > 0 && (
+                                  <span className="mt-1 flex flex-wrap gap-1">
+                                    {pr.tags.map((t) => (
+                                      <span key={t} className="rounded-full bg-ink/10 px-2 py-0.5 text-[11px] font-medium">{t}</span>
+                                    ))}
+                                  </span>
+                                )}
                               </span>
                               <span aria-hidden>↗</span>
                             </a>
