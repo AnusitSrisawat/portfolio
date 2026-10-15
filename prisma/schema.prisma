@@ -21,8 +21,17 @@ model Profile {
   linkedin  String @default("")
 }
 
+model Category {
+  id       Int     @id @default(autoincrement())
+  name     String
+  position Int     @default(0)
+  skills   Skill[]
+}
+
 model Skill {
   id          Int       @id @default(autoincrement())
+  category    Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  categoryId  Int?
   name        String
   description String    @default("")
   tags        String[]  @default([])

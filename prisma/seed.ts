@@ -16,14 +16,18 @@ async function main() {
     },
   });
   if ((await db.skill.count()) === 0) {
+    const lang = await db.category.create({ data: { name: "Languages", position: 0 } });
+    const fe = await db.category.create({ data: { name: "Frontend", position: 1 } });
     await db.skill.create({
       data: {
-        name: "JavaScript", position: 0,
-        description: "Frontend and scripting.", tags: ["React", "Next.js"],
+        name: "JavaScript", categoryId: lang.id, position: 0,
+        description: "Frontend and scripting.", tags: ["ES6+", "Node.js"],
         projects: { create: [{ title: "Example project", url: "https://github.com/", note: "Replace me" }] },
       },
     });
-    await db.skill.create({ data: { name: "UI Design", position: 1, description: "Interfaces in Figma." } });
+    await db.skill.create({
+      data: { name: "React", categoryId: fe.id, position: 0, description: "Component-based UIs.", tags: ["Next.js", "Tailwind"] },
+    });
   }
 }
 main().finally(() => db.$disconnect());

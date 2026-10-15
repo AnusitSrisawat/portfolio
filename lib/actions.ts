@@ -41,14 +41,65 @@ export async function saveProfile(fd: FormData) {
 const parseTags = (s: string) =>
   s.split(",").map((t) => t.trim()).filter(Boolean).slice(0, 8);
 
+const catId = (fd: FormData) => {
+  const n = Number(fd.get("categoryId"));
+  return Number.isInteger(n) && n > 0 ? n : null;
+};
+
+async function reorder<T extends { id: number }>(
+  items: T[],
+  id: number,
+  dir: number,
+  save: (item: T, position: number) => ReturnType<typeof db.skill.update> | ReturnType<typeof db.category.update>,
+) {
+  const i = items.findIndex((x) => x.id === id);
+  const j = i + dir;
+  if (i < 0 || j < 0 || j >= items.length) return;
+  [items[i], items[j]] = [items[j], items[i]];
+  await db.$transaction(items.map((x, idx) => save(x, idx)) as never);
+}
+
+export async function addCategory(fd: FormData) {
+  await requireAdmin();
+  const name = str(fd, "name", 60);
+  if (!name) return;
+  const last = await db.category.findFirst({ orderBy: { position: "desc" } });
+  await db.category.create({ data: { name, position: (last?.position ?? -1) + 1 } });
+  refresh();
+}
+
+export async function renameCategory(fd: FormData) {
+  await requireAdmin();
+  const id = Number(fd.get("id"));
+  const name = str(fd, "name", 60);
+  if (!id || !name) return;
+  await db.category.update({ where: { id }, data: { name } });
+  refresh();
+}
+
+// Skills in the category are kept and shown under "Other".
+export async function deleteCategory(fd: FormData) {
+  await requireAdmin();
+  await db.category.delete({ where: { id: Number(fd.get("id")) } });
+  refresh();
+}
+
+export async function moveCategory(fd: FormData) {
+  await requireAdmin();
+  const all = await db.category.findMany({ orderBy: [{ position: "asc" }, { id: "asc" }] });
+  await reorder(all, Number(fd.get("id")), fd.get("dir") === "up" ? -1 : 1, (c, position) =>
+    db.category.update({ where: { id: c.id }, data: { position } }),
+  );
+  refresh();
+}
+
 export async function addSkill(fd: FormData) {
   await requireAdmin();
   const name = str(fd, "name", 60);
   if (!name) return;
-  const last = await db.skill.findFirst({ orderBy: { position: "desc" } });
-  await db.skill.create({
-    data: { name, position: (last?.position ?? -1) + 1 },
-  });
+  const categoryId = catId(fd);
+  const last = await db.skill.findFirst({ where: { categoryId }, orderBy: { position: "desc" } });
+  await db.skill.create({ data: { name, categoryId, position: (last?.position ?? -1) + 1 } });
   refresh();
 }
 
@@ -57,10 +108,21 @@ export async function updateSkill(fd: FormData) {
   const id = Number(fd.get("id"));
   const name = str(fd, "name", 60);
   if (!id || !name) return;
+  const categoryId = catId(fd);
+  const cur = await db.skill.findUnique({ where: { id } });
+  if (!cur) return;
+  // Moving to another category: put it at the end of that category.
+  let position = cur.position;
+  if (cur.categoryId !== categoryId) {
+    const last = await db.skill.findFirst({ where: { categoryId }, orderBy: { position: "desc" } });
+    position = (last?.position ?? -1) + 1;
+  }
   await db.skill.update({
     where: { id },
     data: {
       name,
+      categoryId,
+      position,
       description: str(fd, "description", 600),
       tags: parseTags(str(fd, "tags", 300)),
     },
@@ -77,14 +139,14 @@ export async function deleteSkill(fd: FormData) {
 export async function moveSkill(fd: FormData) {
   await requireAdmin();
   const id = Number(fd.get("id"));
-  const dir = fd.get("dir") === "up" ? -1 : 1;
-  const all = await db.skill.findMany({ orderBy: [{ position: "asc" }, { id: "asc" }] });
-  const i = all.findIndex((s) => s.id === id);
-  const j = i + dir;
-  if (i < 0 || j < 0 || j >= all.length) return;
-  [all[i], all[j]] = [all[j], all[i]];
-  await db.$transaction(
-    all.map((s, idx) => db.skill.update({ where: { id: s.id }, data: { position: idx } })),
+  const cur = await db.skill.findUnique({ where: { id } });
+  if (!cur) return;
+  const peers = await db.skill.findMany({
+    where: { categoryId: cur.categoryId },
+    orderBy: [{ position: "asc" }, { id: "asc" }],
+  });
+  await reorder(peers, id, fd.get("dir") === "up" ? -1 : 1, (s, position) =>
+    db.skill.update({ where: { id: s.id }, data: { position } }),
   );
   refresh();
 }
