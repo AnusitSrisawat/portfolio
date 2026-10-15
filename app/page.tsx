@@ -1,10 +1,10 @@
-import { getProfile, getSkills } from "@/lib/data";
+import { getGroups, getProfile } from "@/lib/data";
 
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  const [p, skills] = await Promise.all([getProfile(), getSkills()]);
-  const names = skills.map((s) => s.name);
+  const [p, groups] = await Promise.all([getProfile(), getGroups()]);
+  const names = groups.flatMap((g) => g.skills.map((s) => s.name));
   const marquee = names.length ? [...names, ...names, ...names, ...names] : [];
 
   return (
@@ -74,10 +74,10 @@ export default async function Home() {
           What I do &amp; what I&apos;ve built
         </h2>
         <div className="space-y-3">
-          {skills.length === 0 && <p className="text-black/60">No skills yet.</p>}
-          {skills.map((s, i) => (
+          {groups.length === 0 && <p className="text-black/60">No skills yet.</p>}
+          {groups.map((g, i) => (
             <details
-              key={s.id}
+              key={g.id ?? "other"}
               name="skills"
               open={i === 0}
               className="group rounded-3xl border-2 border-ink bg-white open:bg-ink open:text-white"
@@ -85,41 +85,47 @@ export default async function Home() {
               <summary className="flex cursor-pointer items-center justify-between gap-4 px-6 py-5 text-xl font-bold">
                 <span className="flex items-center gap-4">
                   <span className="text-sm font-semibold opacity-50">{String(i + 1).padStart(2, "0")}</span>
-                  {s.name}
+                  {g.name}
+                  <span className="text-sm font-normal opacity-50">{g.skills.length}</span>
                 </span>
                 <span className="chev grid h-9 w-9 place-items-center rounded-full bg-amber text-2xl text-ink transition-transform">+</span>
               </summary>
-              <div className="space-y-4 px-6 pb-6">
-                {s.description && <p className="max-w-2xl opacity-80">{s.description}</p>}
-                {s.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {s.tags.map((t) => (
-                      <span key={t} className="rounded-full border border-white/40 px-3 py-1 text-xs">{t}</span>
-                    ))}
-                  </div>
-                )}
-                {s.projects.length > 0 ? (
-                  <ul className="grid gap-2 sm:grid-cols-2">
-                    {s.projects.map((pr) => (
-                      <li key={pr.id}>
-                        <a
-                          href={pr.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center justify-between rounded-2xl bg-amber px-4 py-3 font-semibold text-ink hover:bg-amber-deep"
-                        >
-                          <span>
-                            {pr.title}
-                            {pr.note && <span className="block text-xs font-normal opacity-70">{pr.note}</span>}
-                          </span>
-                          <span aria-hidden>↗</span>
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="text-sm opacity-60">Projects coming soon.</p>
-                )}
+              <div className="space-y-3 px-6 pb-6">
+                {g.skills.map((s) => (
+                  <article key={s.id} className="grid gap-4 rounded-2xl border border-white/20 p-4 md:grid-cols-[14rem_1fr]">
+                    <div className="space-y-1">
+                      <h3 className="text-lg font-bold">{s.name}</h3>
+                      {s.description && <p className="text-sm opacity-80">{s.description}</p>}
+                    </div>
+                    {s.projects.length > 0 && (
+                      <ul className="grid content-start gap-2 lg:grid-cols-2">
+                        {s.projects.map((pr) => (
+                          <li key={pr.id}>
+                            <a
+                              href={pr.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center justify-between rounded-xl bg-amber px-3 py-2 text-sm font-semibold text-ink hover:bg-amber-deep"
+                            >
+                              <span>
+                                {pr.title}
+                                {pr.description && <span className="mt-0.5 block text-xs font-normal opacity-80">{pr.description}</span>}
+                                {pr.tags.length > 0 && (
+                                  <span className="mt-1 flex flex-wrap gap-1">
+                                    {pr.tags.map((t) => (
+                                      <span key={t} className="rounded-full bg-ink/10 px-2 py-0.5 text-[11px] font-medium">{t}</span>
+                                    ))}
+                                  </span>
+                                )}
+                              </span>
+                              <span aria-hidden>↗</span>
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </article>
+                ))}
               </div>
             </details>
           ))}
