@@ -1,0 +1,41 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Single-owner site: exactly one Profile row (id = 1)
+model Profile {
+  id        Int    @id @default(1)
+  name      String @default("Your Name")
+  role      String @default("Your Role")
+  headline  String @default("Hi, I'm")
+  bio       String @default("")
+  about     String @default("")
+  avatarUrl String @default("")
+  github    String @default("")
+  email     String @default("")
+  linkedin  String @default("")
+}
+
+model Skill {
+  id          Int       @id @default(autoincrement())
+  name        String
+  description String    @default("")
+  tags        String[]  @default([])
+  level       Int       @default(3)
+  position    Int       @default(0)
+  projects    Project[]
+}
+
+model Project {
+  id      Int    @id @default(autoincrement())
+  title   String
+  url     String
+  note    String @default("")
+  skill   Skill  @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  skillId Int
+}
