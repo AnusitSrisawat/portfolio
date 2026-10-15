@@ -19,3 +19,10 @@ Only the GitHub user in `ADMIN_GITHUB_USERNAME` can sign in.
 
 ### Deploy (Vercel)
 Set the same env vars (use a hosted Postgres such as Neon/Supabase for `DATABASE_URL`).
+
+### Upgrading from the one-skill-per-project schema
+Projects are now linked to many skills. If you already have data, run once **before** `npm run db:push`:
+```bash
+psql "$DATABASE_URL" -f prisma/migrate-project-links.sql
+npm run db:push -- --accept-data-loss   # drops the old Project.skillId column
+```

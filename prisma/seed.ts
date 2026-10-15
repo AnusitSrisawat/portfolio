@@ -22,11 +22,17 @@ async function main() {
       data: {
         name: "JavaScript", categoryId: lang.id, position: 0,
         description: "Frontend and scripting.", tags: ["ES6+", "Node.js"],
-        projects: { create: [{ title: "Example project", url: "https://github.com/", note: "Replace me" }] },
       },
     });
-    await db.skill.create({
+    const react = await db.skill.create({
       data: { name: "React", categoryId: fe.id, position: 0, description: "Component-based UIs.", tags: ["Next.js", "Tailwind"] },
+    });
+    const js = await db.skill.findFirstOrThrow({ where: { name: "JavaScript" } });
+    await db.project.create({
+      data: {
+        title: "Example project", url: "https://github.com/", note: "Replace me",
+        skills: { connect: [{ id: js.id }, { id: react.id }] },
+      },
     });
   }
 }

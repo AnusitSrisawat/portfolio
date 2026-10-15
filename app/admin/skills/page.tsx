@@ -1,8 +1,8 @@
 import { db } from "@/lib/db";
 import { getGroups } from "@/lib/data";
 import {
-  addCategory, addProject, addSkill, deleteCategory, deleteProject, deleteSkill,
-  moveCategory, moveSkill, renameCategory, updateProject, updateSkill,
+  addCategory, addSkill, deleteCategory, deleteSkill,
+  moveCategory, moveSkill, renameCategory, updateSkill,
 } from "@/lib/actions";
 
 export const dynamic = "force-dynamic";
@@ -81,29 +81,16 @@ export default async function AdminSkills() {
                 </form>
               </div>
 
-              <div className="space-y-2 border-t-2 border-dashed border-ink/20 pt-4">
-                <h3 className="font-bold">Projects</h3>
-                {s.projects.map((pr) => (
-                  <div key={pr.id} className="rounded-xl bg-cream p-3">
-                    <form action={updateProject} className="grid gap-2 sm:grid-cols-[1fr_1.5fr_1fr]">
-                      <input type="hidden" name="id" value={pr.id} />
-                      <input name="title" defaultValue={pr.title} required aria-label="Title" className="input" />
-                      <input name="url" defaultValue={pr.url} required type="url" aria-label="URL" className="input" />
-                      <input name="note" defaultValue={pr.note} placeholder="Note (optional)" aria-label="Note" className="input" />
-                      <div className="flex gap-2 sm:col-span-3">
-                        <button className="btn btn-primary px-3 py-0.5 text-xs">Save</button>
-                        <button formAction={deleteProject} formNoValidate className="btn px-3 py-0.5 text-xs">Remove</button>
-                      </div>
-                    </form>
-                  </div>
-                ))}
-                <form action={addProject} className="grid gap-2 sm:grid-cols-[1fr_1.5fr_1fr_auto]">
-                  <input type="hidden" name="skillId" value={s.id} />
-                  <input name="title" required placeholder="Title" className="input" />
-                  <input name="url" required type="url" placeholder="https://…" className="input" />
-                  <input name="note" placeholder="Note (optional)" className="input" />
-                  <button className="btn btn-dark text-sm">Add</button>
-                </form>
+              <div className="border-t-2 border-dashed border-ink/20 pt-4 text-sm">
+                <h3 className="mb-1 font-bold">Projects</h3>
+                {s.projects.length ? (
+                  <ul className="list-disc pl-5">
+                    {s.projects.map((pr) => <li key={pr.id}>{pr.title}</li>)}
+                  </ul>
+                ) : (
+                  <p className="opacity-60">None linked.</p>
+                )}
+                <a href="/admin/projects" className="mt-1 inline-block underline">Manage projects →</a>
               </div>
             </article>
           ))}

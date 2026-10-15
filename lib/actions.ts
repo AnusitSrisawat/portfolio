@@ -151,13 +151,21 @@ export async function moveSkill(fd: FormData) {
   refresh();
 }
 
+// Only link to skills that exist (ignores tampered/stale ids).
+async function skillConnect(fd: FormData) {
+  const ids = fd.getAll("skillIds").map(Number).filter((n) => Number.isInteger(n) && n > 0);
+  const found = await db.skill.findMany({ where: { id: { in: ids } }, select: { id: true } });
+  return found.map((s) => ({ id: s.id }));
+}
+
 export async function addProject(fd: FormData) {
   await requireAdmin();
-  const skillId = Number(fd.get("skillId"));
   const title = str(fd, "title", 100);
   const url = safeUrl(str(fd, "url", 500));
-  if (!skillId || !title || !url) return;
-  await db.project.create({ data: { skillId, title, url, note: str(fd, "note", 200) } });
+  if (!title || !url) return;
+  await db.project.create({
+    data: { title, url, note: str(fd, "note", 200), skills: { connect: await skillConnect(fd) } },
+  });
   refresh();
 }
 
@@ -167,7 +175,10 @@ export async function updateProject(fd: FormData) {
   const title = str(fd, "title", 100);
   const url = safeUrl(str(fd, "url", 500));
   if (!id || !title || !url) return;
-  await db.project.update({ where: { id }, data: { title, url, note: str(fd, "note", 200) } });
+  await db.project.update({
+    where: { id },
+    data: { title, url, note: str(fd, "note", 200), skills: { set: await skillConnect(fd) } },
+  });
   refresh();
 }
 

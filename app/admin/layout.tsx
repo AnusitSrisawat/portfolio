@@ -11,6 +11,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         <nav className="flex gap-4 font-semibold">
           <a href="/admin">Profile</a>
           <a href="/admin/skills">Skills</a>
+          <a href="/admin/projects">Projects</a>
           <a href="/" target="_blank">View site ↗</a>
         </nav>
         <form action={logoutAction}>
