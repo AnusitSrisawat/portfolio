@@ -78,7 +78,6 @@ export default async function Home() {
           {skills.map((s, i) => (
             <details
               key={s.id}
-              name="skills"
               open={i === 0}
               className="group rounded-3xl border-2 border-ink bg-white open:bg-ink open:text-white"
             >
@@ -87,7 +86,11 @@ export default async function Home() {
                   <span className="text-sm font-semibold opacity-50">{String(i + 1).padStart(2, "0")}</span>
                   {s.name}
                 </span>
-                <span className="chev grid h-9 w-9 place-items-center rounded-full bg-amber text-2xl text-ink transition-transform">+</span>
+                <span className="chev grid h-9 w-9 shrink-0 place-items-center rounded-full bg-amber text-ink transition-transform">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden>
+                    <path d="M8 2v12M2 8h12" />
+                  </svg>
+                </span>
               </summary>
               <div className="space-y-4 px-6 pb-6">
                 {s.description && <p className="max-w-2xl opacity-80">{s.description}</p>}
