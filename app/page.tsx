@@ -90,13 +90,15 @@ export default async function Home() {
                 </span>
                 <span className="chev grid h-9 w-9 place-items-center rounded-full bg-amber text-2xl text-ink transition-transform">+</span>
               </summary>
-              <div className="grid gap-3 px-6 pb-6 sm:grid-cols-2">
+              <div className="space-y-3 px-6 pb-6">
                 {g.skills.map((s) => (
-                  <article key={s.id} className="space-y-3 rounded-2xl border border-white/20 p-4">
-                    <h3 className="text-lg font-bold">{s.name}</h3>
-                    {s.description && <p className="text-sm opacity-80">{s.description}</p>}
+                  <article key={s.id} className="grid gap-4 rounded-2xl border border-white/20 p-4 md:grid-cols-[14rem_1fr]">
+                    <div className="space-y-1">
+                      <h3 className="text-lg font-bold">{s.name}</h3>
+                      {s.description && <p className="text-sm opacity-80">{s.description}</p>}
+                    </div>
                     {s.projects.length > 0 && (
-                      <ul className="space-y-2">
+                      <ul className="grid content-start gap-2 lg:grid-cols-2">
                         {s.projects.map((pr) => (
                           <li key={pr.id}>
                             <a
