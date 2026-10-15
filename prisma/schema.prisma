@@ -26,7 +26,6 @@ model Skill {
   name        String
   description String    @default("")
   tags        String[]  @default([])
-  level       Int       @default(3)
   position    Int       @default(0)
   projects    Project[]
 }

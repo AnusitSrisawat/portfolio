@@ -38,7 +38,6 @@ export async function saveProfile(fd: FormData) {
   refresh();
 }
 
-const clampLevel = (n: number) => Math.min(5, Math.max(1, Number.isFinite(n) ? n : 3));
 const parseTags = (s: string) =>
   s.split(",").map((t) => t.trim()).filter(Boolean).slice(0, 8);
 
@@ -64,7 +63,6 @@ export async function updateSkill(fd: FormData) {
       name,
       description: str(fd, "description", 600),
       tags: parseTags(str(fd, "tags", 300)),
-      level: clampLevel(Number(fd.get("level"))),
     },
   });
   refresh();

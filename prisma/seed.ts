@@ -18,12 +18,12 @@ async function main() {
   if ((await db.skill.count()) === 0) {
     await db.skill.create({
       data: {
-        name: "JavaScript", level: 4, position: 0,
+        name: "JavaScript", position: 0,
         description: "Frontend and scripting.", tags: ["React", "Next.js"],
         projects: { create: [{ title: "Example project", url: "https://github.com/", note: "Replace me" }] },
       },
     });
-    await db.skill.create({ data: { name: "UI Design", level: 3, position: 1, description: "Interfaces in Figma." } });
+    await db.skill.create({ data: { name: "UI Design", position: 1, description: "Interfaces in Figma." } });
   }
 }
 main().finally(() => db.$disconnect());

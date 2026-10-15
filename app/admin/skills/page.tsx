@@ -18,12 +18,7 @@ export default async function AdminSkills() {
         <section key={s.id} className="space-y-4 rounded-3xl border-2 border-ink bg-white p-5">
           <form action={updateSkill} className="space-y-3">
             <input type="hidden" name="id" value={s.id} />
-            <div className="grid gap-3 sm:grid-cols-[1fr_6rem]">
-              <input name="name" defaultValue={s.name} required className="input font-bold" />
-              <select name="level" defaultValue={s.level} className="input" aria-label="Level">
-                {[1, 2, 3, 4, 5].map((n) => <option key={n} value={n}>Lv {n}</option>)}
-              </select>
-            </div>
+            <input name="name" defaultValue={s.name} required className="input font-bold" />
             <textarea name="description" defaultValue={s.description} rows={2} placeholder="Description" className="input" />
             <input name="tags" defaultValue={s.tags.join(", ")} placeholder="Tags, comma separated" className="input" />
             <div className="flex flex-wrap gap-2">
