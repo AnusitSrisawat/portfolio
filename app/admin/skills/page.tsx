@@ -1,5 +1,5 @@
 import { getSkills } from "@/lib/data";
-import { addProject, addSkill, deleteProject, deleteSkill, moveSkill, updateSkill } from "@/lib/actions";
+import { addProject, addSkill, deleteProject, deleteSkill, moveSkill, updateProject, updateSkill } from "@/lib/actions";
 
 export const dynamic = "force-dynamic";
 
@@ -49,11 +49,18 @@ export default async function AdminSkills() {
           <div className="space-y-2 border-t-2 border-dashed border-ink/20 pt-4">
             <h2 className="font-bold">Projects</h2>
             {s.projects.map((pr) => (
-              <form key={pr.id} action={deleteProject} className="flex items-center justify-between gap-2 rounded-xl bg-cream px-3 py-2 text-sm">
-                <input type="hidden" name="id" value={pr.id} />
-                <a href={pr.url} target="_blank" rel="noopener noreferrer" className="truncate underline">{pr.title}</a>
-                <button className="btn px-3 py-0.5 text-xs">Remove</button>
-              </form>
+              <div key={pr.id} className="rounded-xl bg-cream p-3">
+                <form action={updateProject} className="grid gap-2 sm:grid-cols-[1fr_1.5fr_1fr]">
+                  <input type="hidden" name="id" value={pr.id} />
+                  <input name="title" defaultValue={pr.title} required aria-label="Title" className="input" />
+                  <input name="url" defaultValue={pr.url} required type="url" aria-label="URL" className="input" />
+                  <input name="note" defaultValue={pr.note} placeholder="Note (optional)" aria-label="Note" className="input" />
+                  <div className="flex gap-2 sm:col-span-3">
+                    <button className="btn btn-primary px-3 py-0.5 text-xs">Save</button>
+                    <button formAction={deleteProject} formNoValidate className="btn px-3 py-0.5 text-xs">Remove</button>
+                  </div>
+                </form>
+              </div>
             ))}
             <form action={addProject} className="grid gap-2 sm:grid-cols-[1fr_1.5fr_1fr_auto]">
               <input type="hidden" name="skillId" value={s.id} />

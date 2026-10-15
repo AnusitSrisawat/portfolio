@@ -101,6 +101,16 @@ export async function addProject(fd: FormData) {
   refresh();
 }
 
+export async function updateProject(fd: FormData) {
+  await requireAdmin();
+  const id = Number(fd.get("id"));
+  const title = str(fd, "title", 100);
+  const url = safeUrl(str(fd, "url", 500));
+  if (!id || !title || !url) return;
+  await db.project.update({ where: { id }, data: { title, url, note: str(fd, "note", 200) } });
+  refresh();
+}
+
 export async function deleteProject(fd: FormData) {
   await requireAdmin();
   await db.project.delete({ where: { id: Number(fd.get("id")) } });
