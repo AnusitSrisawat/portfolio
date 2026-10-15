@@ -9,6 +9,18 @@ async function requireAdmin() {
   if (!s?.user) throw new Error("Unauthorized");
 }
 
+// Rejected input must surface as an error (shown in the UI), not a silent no-op
+// that the UI would report as "Saved".
+const invalid = (what: string): never => {
+  throw new Error(`Invalid ${what}`);
+};
+
+// Optional URL: empty is fine, a non-empty value must be a safe http(s) link.
+const optionalUrl = (v: string, what: string) => {
+  const u = safeUrl(v);
+  return u === null ? invalid(what) : u;
+};
+
 const refresh = () => {
   revalidatePath("/");
   revalidatePath("/admin", "layout");
@@ -29,9 +41,9 @@ export async function saveProfile(fd: FormData) {
     headline: str(fd, "headline", 40),
     bio: str(fd, "bio", 400),
     about: str(fd, "about", 2000),
-    avatarUrl: safeUrl(str(fd, "avatarUrl")) ?? "",
-    github: safeUrl(str(fd, "github")) ?? "",
-    linkedin: safeUrl(str(fd, "linkedin")) ?? "",
+    avatarUrl: optionalUrl(str(fd, "avatarUrl"), "avatar URL"),
+    github: optionalUrl(str(fd, "github"), "GitHub URL"),
+    linkedin: optionalUrl(str(fd, "linkedin"), "LinkedIn URL"),
     email: str(fd, "email", 120),
   };
   await db.profile.upsert({ where: { id: 1 }, update: data, create: { id: 1, ...data } });
@@ -62,7 +74,7 @@ async function reorder<T extends { id: number }>(
 export async function addCategory(fd: FormData) {
   await requireAdmin();
   const name = str(fd, "name", 60);
-  if (!name) return;
+  if (!name) return invalid("name");
   const last = await db.category.findFirst({ orderBy: { position: "desc" } });
   await db.category.create({ data: { name, position: (last?.position ?? -1) + 1 } });
   refresh();
@@ -72,7 +84,7 @@ export async function renameCategory(fd: FormData) {
   await requireAdmin();
   const id = Number(fd.get("id"));
   const name = str(fd, "name", 60);
-  if (!id || !name) return;
+  if (!id || !name) return invalid("name");
   await db.category.update({ where: { id }, data: { name } });
   refresh();
 }
@@ -96,7 +108,7 @@ export async function moveCategory(fd: FormData) {
 export async function addSkill(fd: FormData) {
   await requireAdmin();
   const name = str(fd, "name", 60);
-  if (!name) return;
+  if (!name) return invalid("name");
   const categoryId = catId(fd);
   const last = await db.skill.findFirst({ where: { categoryId }, orderBy: { position: "desc" } });
   await db.skill.create({ data: { name, categoryId, position: (last?.position ?? -1) + 1 } });
@@ -107,10 +119,10 @@ export async function updateSkill(fd: FormData) {
   await requireAdmin();
   const id = Number(fd.get("id"));
   const name = str(fd, "name", 60);
-  if (!id || !name) return;
+  if (!id || !name) return invalid("skill");
   const categoryId = catId(fd);
   const cur = await db.skill.findUnique({ where: { id } });
-  if (!cur) return;
+  if (!cur) return invalid("skill");
   // Moving to another category: put it at the end of that category.
   let position = cur.position;
   if (cur.categoryId !== categoryId) {
@@ -142,11 +154,13 @@ export type Layout = { categoryId: number | null; skillIds: number[] }[];
 // Persist drag-and-drop: every skill's category and position in one transaction.
 export async function saveLayout(layout: Layout) {
   await requireAdmin();
+  if (!Array.isArray(layout)) return invalid("layout");
   const cats = new Set((await db.category.findMany({ select: { id: true } })).map((c) => c.id));
   const skills = new Set((await db.skill.findMany({ select: { id: true } })).map((s) => s.id));
   const seen = new Set<number>();
   const ops = [];
   for (const col of layout) {
+    if (!col || !Array.isArray(col.skillIds)) continue;
     if (col.categoryId !== null && !cats.has(col.categoryId)) continue;
     let pos = 0;
     for (const id of col.skillIds) {
@@ -173,7 +187,7 @@ export async function addProject(fd: FormData) {
   const title = str(fd, "title", 100);
   const url = safeUrl(str(fd, "url", 500));
   const description = str(fd, "description", 1000);
-  if (!title || !url || !description) return;
+  if (!title || !url || !description) return invalid("project (title, http(s) URL and description are required)");
   await db.project.create({
     data: { title, url, description, tags: parseTags(str(fd, "tags", 300)) },
   });
@@ -186,7 +200,7 @@ export async function updateProject(fd: FormData) {
   const title = str(fd, "title", 100);
   const url = safeUrl(str(fd, "url", 500));
   const description = str(fd, "description", 1000);
-  if (!id || !title || !url || !description) return;
+  if (!id || !title || !url || !description) return invalid("project (title, http(s) URL and description are required)");
   await db.project.update({
     where: { id },
     data: { title, url, description, tags: parseTags(str(fd, "tags", 300)) },

@@ -26,21 +26,31 @@ type Items = Record<string, number[]>;
 const toItems = (cols: BoardColumn[]): Items =>
   Object.fromEntries(cols.map((c) => [c.key, c.skills.map((s) => s.id)]));
 
-function Row({ id, name, deleteAction, overlay }: { id: number; name: string; deleteAction: Props["deleteAction"]; overlay?: boolean }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+function RowView({
+  name, deleteAction, id, handleProps, rowRef, style, dimmed, overlay,
+}: {
+  name: string;
+  id: number;
+  deleteAction: Props["deleteAction"];
+  handleProps?: Record<string, unknown>;
+  rowRef?: (el: HTMLElement | null) => void;
+  style?: React.CSSProperties;
+  dimmed?: boolean;
+  overlay?: boolean;
+}) {
   return (
     <div
-      ref={overlay ? undefined : setNodeRef}
-      style={overlay ? undefined : { transform: CSS.Transform.toString(transform), transition }}
-      className={`flex items-center gap-2 rounded-xl border-2 border-ink bg-white px-2 py-1.5 ${
-        isDragging && !overlay ? "opacity-30" : ""
-      } ${overlay ? "shadow-xl" : ""}`}
+      ref={rowRef}
+      style={style}
+      className={`flex items-center gap-2 rounded-xl border-2 border-ink bg-white px-2 py-1.5 ${dimmed ? "opacity-30" : ""} ${
+        overlay ? "shadow-xl" : ""
+      }`}
     >
       <button
         type="button"
         className="cursor-grab touch-none select-none rounded px-1 text-lg leading-none active:cursor-grabbing"
         aria-label={`Drag ${name}`}
-        {...(overlay ? {} : { ...attributes, ...listeners })}
+        {...handleProps}
       >
         ⠿
       </button>
@@ -60,6 +70,23 @@ function Row({ id, name, deleteAction, overlay }: { id: number; name: string; de
   );
 }
 
+// useSortable registers the id with dnd-kit, so the drag overlay must NOT use it
+// (it renders RowView directly) or the same id would be registered twice.
+function SortableRow({ id, name, deleteAction }: { id: number; name: string; deleteAction: Props["deleteAction"] }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+  return (
+    <RowView
+      id={id}
+      name={name}
+      deleteAction={deleteAction}
+      rowRef={setNodeRef}
+      style={{ transform: CSS.Transform.toString(transform), transition }}
+      dimmed={isDragging}
+      handleProps={{ ...attributes, ...listeners }}
+    />
+  );
+}
+
 function Column({ col, ids, names, deleteAction }: { col: BoardColumn; ids: number[]; names: Map<number, string>; deleteAction: Props["deleteAction"] }) {
   const { setNodeRef, isOver } = useDroppable({ id: col.key });
   return (
@@ -72,7 +99,7 @@ function Column({ col, ids, names, deleteAction }: { col: BoardColumn; ids: numb
       <h3 className="text-xs font-bold uppercase tracking-wide opacity-60">{col.name}</h3>
       <SortableContext items={ids} strategy={verticalListSortingStrategy}>
         {ids.map((id) => (
-          <Row key={id} id={id} name={names.get(id) ?? ""} deleteAction={deleteAction} />
+          <SortableRow key={id} id={id} name={names.get(id) ?? ""} deleteAction={deleteAction} />
         ))}
       </SortableContext>
       {ids.length === 0 && <p className="py-2 text-center text-xs opacity-50">Drop skills here</p>}
@@ -191,7 +218,7 @@ export function SkillBoard({ columns, save, deleteAction }: Props) {
           ))}
         </div>
         <DragOverlay>
-          {activeId !== null && <Row id={activeId} name={names.get(activeId) ?? ""} deleteAction={deleteAction} overlay />}
+          {activeId !== null && <RowView id={activeId} name={names.get(activeId) ?? ""} deleteAction={deleteAction} overlay />}
         </DragOverlay>
       </DndContext>
     </div>

@@ -4,6 +4,7 @@ import {
   addCategory, addSkill, deleteCategory, deleteSkill,
   moveCategory, renameCategory, saveLayout, updateSkill,
 } from "@/lib/actions";
+import { requireAdminPage } from "@/lib/session";
 import { ActionForm } from "@/components/ActionForm";
 import { SkillBoard } from "@/components/SkillBoard";
 import { ProjectPicker } from "@/components/ProjectPicker";
@@ -25,6 +26,7 @@ const Move = ({ action, id, last, first }: { action: (fd: FormData) => Promise<v
 );
 
 export default async function AdminSkills() {
+  await requireAdminPage();
   const [groups, categories, allProjects] = await Promise.all([
     getGroups(),
     db.category.findMany({ orderBy: [{ position: "asc" }, { id: "asc" }] }),

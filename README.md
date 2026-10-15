@@ -33,3 +33,10 @@ Skills now keep their own ordering of projects in a `SkillProject` table. If you
 psql "$DATABASE_URL" -f prisma/migrate-skill-project.sql
 npm run db:push -- --accept-data-loss   # drops the old "_ProjectToSkill" table
 ```
+
+### Neon tip: use the direct (non-pooled) URL for `db:push`
+Neon's `-pooler` host runs through PgBouncer, which can make `prisma db push` hang or fail on its advisory lock.
+Use the pooled URL for the running app, but run schema commands with the direct URL (same host without `-pooler`):
+```bash
+DATABASE_URL="postgresql://USER:PASS@ep-xxxx.region.aws.neon.tech/neondb?sslmode=require" npx prisma db push
+```

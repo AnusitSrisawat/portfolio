@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useRef, useTransition } from "react";
+import { toast } from "@/components/Toaster";
 
 type Confirm = { title: string; body?: string; label?: string; danger?: boolean };
 
@@ -17,8 +18,6 @@ type Props = {
   resetOnSuccess?: boolean;
 };
 
-type Status = "idle" | "saved" | "error";
-
 export function ActionForm({
   action, children, className, id, confirm,
   pendingText = "Saving…", successText = "Saved", resetOnSuccess,
@@ -26,26 +25,18 @@ export function ActionForm({
   const formRef = useRef<HTMLFormElement>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [pending, startTransition] = useTransition();
-  const [status, setStatus] = useState<Status>("idle");
-
-  useEffect(() => {
-    if (status === "idle") return;
-    const t = setTimeout(() => setStatus("idle"), status === "error" ? 4000 : 1800);
-    return () => clearTimeout(t);
-  }, [status]);
 
   function run() {
     const form = formRef.current;
     if (!form) return;
     const data = new FormData(form); // read before anything changes
-    setStatus("idle");
     startTransition(async () => {
       try {
         await action(data);
         if (resetOnSuccess) form.reset();
-        setStatus("saved");
+        toast("ok", successText);
       } catch {
-        setStatus("error");
+        toast("error", "Something went wrong — check your input and try again");
       }
     });
   }
@@ -93,18 +84,6 @@ export function ActionForm({
             <span className="h-5 w-5 animate-spin rounded-full border-[3px] border-ink/20 border-t-amber-deep" />
             {pendingText}
           </div>
-        </div>
-      )}
-
-      {status !== "idle" && !pending && (
-        <div
-          role="status"
-          aria-live="polite"
-          className={`fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-full border-2 border-ink px-5 py-2 text-sm font-semibold shadow-lg ${
-            status === "saved" ? "bg-amber text-ink" : "bg-red-500 text-white"
-          }`}
-        >
-          {status === "saved" ? `✓ ${successText}` : "Something went wrong — try again"}
         </div>
       )}
     </form>

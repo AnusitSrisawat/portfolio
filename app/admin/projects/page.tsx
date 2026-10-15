@@ -1,10 +1,12 @@
 import { db } from "@/lib/db";
 import { addProject, deleteProject, updateProject } from "@/lib/actions";
+import { requireAdminPage } from "@/lib/session";
 import { ActionForm } from "@/components/ActionForm";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminProjects() {
+  await requireAdminPage();
   const projects = await db.project.findMany({
     orderBy: { id: "desc" },
     include: { skills: { include: { skill: { select: { name: true } } } } },
